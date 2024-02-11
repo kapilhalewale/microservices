@@ -1,0 +1,5 @@
+contacts:
+  message: "Welcome to customer service related (QA) APIs :: Live7"
+  contactDetails:
+    name: "Mr. Kumar - QA Lead"
+    email: "qa@gmail.com"

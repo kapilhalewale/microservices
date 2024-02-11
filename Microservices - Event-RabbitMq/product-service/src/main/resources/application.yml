@@ -1,0 +1,69 @@
+server:
+  port: 9081
+
+#Database configuration
+spring:
+  application:
+    name: "product-service"
+  profiles:
+    active: "uat"
+  datasource:
+    url: jdbc:mysql://localhost:3307/customer-service?useUnicode=true&characterEncoding=utf-8
+    driverClassName: com.mysql.jdbc.Driver
+    username: root
+    password: root
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+  config:
+    import: "optional:configserver:http://localhost:8071/"
+
+# To fetch updated property values as an when from cloud config
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  health:
+    readiness-state:
+      enabled: true
+    liveness-state:
+      enabled: true
+  endpoint:
+    shutdown:
+      enabled: true
+    health:
+      probes:
+        enabled: true
+
+  info:
+    env:
+      enabled: true
+
+endpoints:
+  shutdown:
+    enabled: true
+
+
+eureka:
+  instance:
+    preferIpAddress: true
+  client:
+    fetchRegistry: true
+    registerWithEureka: true
+    serviceUrl:
+      defaultZone: http://localhost:8070/eureka/
+
+
+info:
+  app:
+    name: "Product Service"
+    description: ""
+    version: "1.0"
+
+logging:
+  level:
+    com:
+      kp:
+        product: DEBUG

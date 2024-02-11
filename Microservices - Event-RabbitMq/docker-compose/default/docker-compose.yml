@@ -1,0 +1,110 @@
+services:
+
+  database-service:
+    container_name: database-service
+    ports:
+      - 3307:3306
+    environment:
+      MYSQL_DATABASE: customer-service
+    extends:
+      file: common-config.yml
+      service: microservice-db-config
+
+  eureka-server:
+    image: "hkapilkumar/eureka-server:s9"
+    container_name: eureka-server-container
+    ports:
+      - "8070:8070"
+    environment:
+      SPRING_APPLICAION_NAME: "eureka-server"
+    healthcheck:
+      test: "curl --fail --silent localhost:8070/actuator/health/readiness | grep UP || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    extends:
+      file: common-config.yml
+      service: microservice-configserver-config
+
+
+  config-service:
+    image: "hkapilkumar/config-server:s9"
+    container_name: config-server-container
+    ports:
+      - "8071:8071"
+    environment:
+      SPRING_APPLICAION_NAME: "config-server"
+    healthcheck:
+      test: "curl --fail --silent localhost:8071/actuator/health/readiness | grep UP || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    extends:
+      file: common-config.yml
+      service: microservice-base-config
+
+  customer-service:
+    image: "hkapilkumar/customer-service:s9"
+    container_name: customer-service-container
+    ports:
+      - "9080:9080"
+    healthcheck:
+      test: "curl --fail --silent localhost:9080/actuator/health/readiness | grep UP || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    environment:
+      SPRING_APPLICAION_NAME: "customer-service"
+      SPRING_DATASOURCE_URL: "jdbc:mysql://database-service:3306/customer-service?useUnicode=true&characterEncoding=utf-8"
+    extends:
+      file: common-config.yml
+      service: microservice-eureka-config
+
+  product-service:
+    image: "hkapilkumar/product-service:s9"
+    container_name: product-service-container
+    ports:
+      - "9081:9081"
+    healthcheck:
+      test: "curl --fail --silent localhost:9081/actuator/health/readiness | grep UP || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    environment:
+      SPRING_APPLICAION_NAME: "product-service"
+      SPRING_DATASOURCE_URL: "jdbc:mysql://database-service:3306/customer-service?useUnicode=true&characterEncoding=utf-8"
+    extends:
+      file: common-config.yml
+      service: microservice-eureka-config
+
+  apigateway-server:
+    image: "hkapilkumar/apigateway-server:s9"
+    container_name: apigateway-server-container
+    ports:
+      - "8079:8079"
+    depends_on:
+      customer-service:
+        condition: service_healthy
+      product-service:
+        condition: service_healthy
+    environment:
+      SPRING_APPLICAION_NAME: "apigateway-server"
+#      SPRING_DATASOURCE_URL: "jdbc:mysql://database-service:3306/customer-service?useUnicode=true&characterEncoding=utf-8"
+    extends:
+      file: common-config.yml
+      service: microservice-eureka-config
+
+networks:
+  kpservice:
+    driver: "bridge"
+
+
+#To run docker compose
+# docker compose up -d
+# docker compose down
+# docker compose start
+# docker compose stop

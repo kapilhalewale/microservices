@@ -1,0 +1,5 @@
+contacts:
+  message: "Welcome to product service related (default-spring-cloud) APIs live7"
+  contactDetails:
+    name: "Kapil Kumar - Dev Lead"
+    email: "kapilkumar@gmail.com"
